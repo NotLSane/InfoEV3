@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
+
+
 def haversine(lat1, lon1, lat2, lon2):
     #Función para calcular la distancia entre 2 puntos a partir de la longitud
     pass
