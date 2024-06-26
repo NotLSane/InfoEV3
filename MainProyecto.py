@@ -1,7 +1,8 @@
 import math
 import customtkinter as ctk
 import os
-import tkinter
+import tkinter as tk
+from tkinter import filedialog, ttk
 from PIL import Image
 from tkinter import filedialog
 import pandas as pd
@@ -15,6 +16,7 @@ from CTkMessagebox import CTkMessagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+import customtkinter as ctk
 
 
 
@@ -147,7 +149,7 @@ def seleccionar_archivo():
     archivo = filedialog.askopenfilename(filetypes=[("Archivos CSV", "*.csv")])
     if archivo:
         print(f"Archivo seleccionado: {archivo}")
-        mostrar_datos(archivo)
+        leer_archivo_csv(archivo)
 def on_scrollbar_move(*args):
     canvas.yview(*args)
     canvas.bbox("all")
@@ -160,20 +162,34 @@ def leer_archivo_csv(ruta_archivo):
 
 # Función para mostrar los datos en la tabla
 def mostrar_datos(datos):
-    # Botón para imprimir las filas seleccionadas
-    boton_imprimir = ctk.CTkButton(
-        master=home_frame, text="guardar informacion", command=lambda: guardar_data())
-    boton_imprimir.grid(row=2, column=0, pady=(0, 20))
+    # Limpiar el contenido anterior del frame
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
     
-    # Botón para imprimir las filas seleccionadas
-    boton_imprimir = ctk.CTkButton(
-        master=data_panel_superior, text="modificar dato", command=lambda: editar_panel(root))
-    boton_imprimir.grid(row=0, column=2, pady=(0, 0))
+    tree = ttk.Treeview(scrollable_frame, columns=list(datos.columns), show='headings')
+    for col in datos.columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100)
+    
+    for index, row in datos.iterrows():
+        tree.insert("", "end", values=list(row))
+    
+    tree.pack(fill="both", expand=True)
+    
+    # Botón para guardar la información
+    boton_guardar = ctk.CTkButton(
+        master=home_frame, text="Guardar Información", command=lambda: guardar_data())
+    boton_guardar.grid(row=2, column=0, pady=(0, 20))
 
-    # Botón para imprimir las filas seleccionadas
-    boton_imprimir = ctk.CTkButton(
-        master=data_panel_superior, text="Eliminar dato", command=lambda: editar_panel(root),fg_color='purple',hover_color='red')
-    boton_imprimir.grid(row=0, column=3, padx=(10, 0))
+    # Botón para modificar datos
+    boton_modificar = ctk.CTkButton(
+        master=data_panel_superior, text="Modificar Dato", command=lambda: editar_panel(root))
+    boton_modificar.grid(row=0, column=2, pady=(0, 0))
+
+    # Botón para eliminar datos
+    boton_eliminar = ctk.CTkButton(
+        master=data_panel_superior, text="Eliminar Dato", command=lambda: editar_panel(root), fg_color='purple', hover_color='red')
+    boton_eliminar.grid(row=0, column=3, padx=(10, 0))
 def select_frame_by_name(name):
     home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
     frame_2_button.configure(fg_color=("gray75", "gray25") if name == "frame_2" else "transparent")
