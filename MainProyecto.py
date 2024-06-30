@@ -23,12 +23,18 @@ import customtkinter as ctk
 def haversine(lat1, lon1, lat2, lon2):
     #Función para calcular la distancia entre 2 puntos a partir de la longitud
     pass
-def ejecutar_query_sqlite(database_name, table_name, columns='*', where_column=None, where_value=None):
+
+
+#
+# Base de dato db
+#
+
+def ejecutar_query_sqlite(db_personal, table_name, columns='*', where_column=None, where_value=None):
     """
     Ejecuta una consulta SQ L en una base de datos SQLite y retorna una lista con los resultados.
 
     Parámetros:
-    database_name (str): Nombre del archivo de la base de datos SQLite.
+    db_personal (str): Nombre del archivo de la base de datos SQLite.
     table_name (str): Nombre de la tabla para realizar la consulta.
     columns (str): Columnas a seleccionar (por defecto es '*').
     where_column (str): Nombre de la columna para la cláusula WHERE (opcional).
@@ -38,7 +44,7 @@ def ejecutar_query_sqlite(database_name, table_name, columns='*', where_column=N
     list: Lista con los resultados de la consulta.
     """
     # Conectar a la base de datos SQLite
-    conn = sqlite3.connect(database_name)
+    conn = sqlite3.connect(db_personal) 
     cursor = conn.cursor()
 
     # Crear la consulta SQL
@@ -57,23 +63,30 @@ def ejecutar_query_sqlite(database_name, table_name, columns='*', where_column=N
 
     return resultados
 
-def agregar_df_a_sqlite(df, database_name, table_name):
+def agregar_df_a_sqlite(df, db_personal, table_name):
     """
     Agrega un DataFrame a una tabla SQLite.
 
     Parámetros:
     df (pd.DataFrame): DataFrame a agregar a la base de datos.
-    database_name (str): Nombre del archivo de la base de datos SQLite.
+    db_personal (str): Nombre del archivo de la base de datos SQLite.
     table_name (str): Nombre de la tabla donde se insertará el DataFrame.
     """
     # Conectar a la base de datos SQLite
-    conn = sqlite3.connect(database_name)
+    conn = sqlite3.connect(db_personal)
     
     # Agregar el DataFrame a la tabla SQLite
     df.to_sql(table_name, conn, if_exists='replace', index=False)
     
     # Cerrar la conexión
     conn.close()
+
+
+
+#
+# Aqui comienza la ventana
+#
+
 #documentacion=https://github.com/TomSchimansky/TkinterMapView?tab=readme-ov-file#create-path-from-position-list
 def get_country_city(lat,long):
     country = tkintermapview.convert_coordinates_to_country(lat, long)
@@ -122,28 +135,91 @@ def center_window(window, width, height):
 
     window.geometry(f"{width}x{height}+{x}+{y}")
 
+
+# Funcion para modificar datos
+
 def setup_toplevel(window):
     window.geometry("400x300")
     window.title("Modificar datos")
     center_window(window, 400, 300)  # Centrar la ventana secundaria
     window.lift()  # Levanta la ventana secundaria
     window.focus_force()  # Forzar el enfoque en la ventana secundaria
-    window.grab_set()  # Evita la interacción con la ventana principal
+
 
     label = ctk.CTkLabel(window, text="ToplevelWindow")
     label.pack(padx=20, pady=20)
+
+
 def calcular_distancia(RUT1,RUT2):
     pass
+
+
 def guardar_data(row_selector):
     print(row_selector.get())
     print(row_selector.table.values)
+
+
+import tkinter as tk
+import tkinter.ttk as ctk
+
 def editar_panel(root):
     global toplevel_window
     if toplevel_window is None or not toplevel_window.winfo_exists():
         toplevel_window = ctk.CTkToplevel(root)
         setup_toplevel(toplevel_window)
+        
+        label_rut = ctk.CTkLabel(toplevel_window, text="Rut empleado:")
+        label_rut.pack(pady=10)
+        
+        entry_rut = ctk.CTkEntry(toplevel_window)
+        entry_rut.pack(pady=10)
+        
+        # Función para guardar los cambios
+        def guardar_cambios():
+            cambio_seleccionado = var.get()
+            if cambio_seleccionado == 1:
+                # Lógica para cambiar el nombre
+                nuevo_nombre = entry_nombre.get()
+                # Guardar nuevo nombre en la base de datos o donde corresponda
+            elif cambio_seleccionado == 2:
+                # Lógica para cambiar el salario
+                nuevo_salario = entry_salario.get()
+                # Guardar nuevo salario en la base de datos o donde corresponda
+            
+            # Cerrar la ventana después de guardar los cambios
+            toplevel_window.destroy()
+        
+        # Opciones de cambios
+        var = tk.IntVar()
+        
+        option_nombre = ctk.CTkRadiobutton(toplevel_window, text="Cambiar nombre", variable=var, value=1)
+        option_nombre.pack(pady=5)
+        
+        entry_nombre = ctk.CTkEntry(toplevel_window)
+        entry_nombre.pack(pady=5)
+        
+        option_salario = ctk.CTkRadiobutton(toplevel_window, text="Cambiar salario", variable=var, value=2)
+        option_salario.pack(pady=5)
+        
+        entry_salario = ctk.CTkEntry(toplevel_window)
+        entry_salario.pack(pady=5)
+        
+        # Botón para guardar los cambios
+        boton_guardar = ctk.CTkButton(toplevel_window, text="Guardar Cambios", command=guardar_cambios)
+        boton_guardar.pack(pady=10)
+        
     else:
         toplevel_window.focus()
+        
+# Ejemplo de uso
+root = tk.Tk()
+toplevel_window = None
+editar_panel(root)
+root.mainloop()
+
+
+
+
 # Función para manejar la selección del archivo
 def seleccionar_archivo():
     archivo = filedialog.askopenfilename(filetypes=[("Archivos CSV", "*.csv")])
@@ -159,6 +235,9 @@ def leer_archivo_csv(ruta_archivo):
         mostrar_datos(datos)
     except Exception as e:
         print(f"Error al leer el archivo CSV: {e}")
+
+
+
 
 # Función para mostrar los datos en la tabla
 def mostrar_datos(datos):
@@ -233,6 +312,12 @@ root.geometry("950x450")
 # Configurar el diseño de la ventana principal
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
+
+
+
+
+
+
 
 # Establecer la carpeta donde están las imágenes
 image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "iconos")
