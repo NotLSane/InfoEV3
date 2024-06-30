@@ -159,9 +159,6 @@ def guardar_data(row_selector):
     print(row_selector.table.values)
 
 
-import tkinter as tk
-import tkinter.ttk as ctk
-
 def editar_panel(root):
     global toplevel_window
     if toplevel_window is None or not toplevel_window.winfo_exists():
@@ -173,36 +170,13 @@ def editar_panel(root):
         
         entry_rut = ctk.CTkEntry(toplevel_window)
         entry_rut.pack(pady=10)
-        
-        # Función para guardar los cambios
+
         def guardar_cambios():
-            cambio_seleccionado = var.get()
-            if cambio_seleccionado == 1:
-                # Lógica para cambiar el nombre
-                nuevo_nombre = entry_nombre.get()
-                # Guardar nuevo nombre en la base de datos o donde corresponda
-            elif cambio_seleccionado == 2:
-                # Lógica para cambiar el salario
-                nuevo_salario = entry_salario.get()
-                # Guardar nuevo salario en la base de datos o donde corresponda
             
+            #aqui se deben guardar nuevos datos
+            #deberia aver una consulata a la base de datos aqui 
             # Cerrar la ventana después de guardar los cambios
             toplevel_window.destroy()
-        
-        # Opciones de cambios
-        var = tk.IntVar()
-        
-        option_nombre = ctk.CTkRadiobutton(toplevel_window, text="Cambiar nombre", variable=var, value=1)
-        option_nombre.pack(pady=5)
-        
-        entry_nombre = ctk.CTkEntry(toplevel_window)
-        entry_nombre.pack(pady=5)
-        
-        option_salario = ctk.CTkRadiobutton(toplevel_window, text="Cambiar salario", variable=var, value=2)
-        option_salario.pack(pady=5)
-        
-        entry_salario = ctk.CTkEntry(toplevel_window)
-        entry_salario.pack(pady=5)
         
         # Botón para guardar los cambios
         boton_guardar = ctk.CTkButton(toplevel_window, text="Guardar Cambios", command=guardar_cambios)
@@ -210,14 +184,6 @@ def editar_panel(root):
         
     else:
         toplevel_window.focus()
-        
-# Ejemplo de uso
-root = tk.Tk()
-toplevel_window = None
-editar_panel(root)
-root.mainloop()
-
-
 
 
 # Función para manejar la selección del archivo
@@ -263,6 +229,11 @@ def mostrar_datos(datos):
     # Botón para modificar datos
     boton_modificar = ctk.CTkButton(
         master=data_panel_superior, text="Modificar Dato", command=lambda: editar_panel(root))
+    boton_modificar.grid(row=0, column=1, pady=(0, 0))
+
+    # Botón para Agregar datos
+    boton_modificar = ctk.CTkButton(
+        master=data_panel_superior, text="Agregar Dato", command=lambda: editar_panel(root), fg_color='purple', hover_color='green')
     boton_modificar.grid(row=0, column=2, pady=(0, 0))
 
     # Botón para eliminar datos
@@ -307,7 +278,7 @@ def mapas(panel):
 # Crear la ventana principal
 root = ctk.CTk()
 root.title("Proyecto Final progra I 2024")
-root.geometry("950x450")
+root.geometry("1000x450")
 
 # Configurar el diseño de la ventana principal
 root.grid_rowconfigure(0, weight=1)
