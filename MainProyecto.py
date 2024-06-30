@@ -309,17 +309,17 @@ navigation_frame_label = ctk.CTkLabel(navigation_frame, text="", image=logo_imag
                                       compound="left", font=ctk.CTkFont(size=15, weight="bold"))
 navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
-home_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
+home_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Datos Empledos",
                             fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                             image=home_image, anchor="w", command=home_button_event)
 home_button.grid(row=1, column=0, sticky="ew")
 
-frame_2_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 2",
+frame_2_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Estadisticas Empleados",
                                fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                image=chat_image, anchor="w", command=frame_2_button_event)
 frame_2_button.grid(row=2, column=0, sticky="ew")
 
-frame_3_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame 3",
+frame_3_button = ctk.CTkButton(navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Distancia entre Empelados",
                                fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                image=add_user_image, anchor="w", command=frame_3_button_event)
 frame_3_button.grid(row=3, column=0, sticky="ew")
