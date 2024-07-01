@@ -20,6 +20,7 @@ import customtkinter as ctk
 
 
 
+
 def haversine(lat1, lon1, lat2, lon2):
     #Función para calcular la distancia entre 2 puntos a partir de la longitud
     pass
@@ -31,16 +32,16 @@ def haversine(lat1, lon1, lat2, lon2):
 # Creador de CSV a Base de Datos
 # Se debe importar al codigo original
 
-def csv_to_sqlite(csv_file, db_file, table_name):
+def csv_to_sqlite(data_a_procesar, datos_empleados, table_name):
     # Leer el archivo CSV
     try:
-        df = pd.read_csv(csv_file)
+        df = pd.read_csv(data_a_procesar)
     except Exception as e:
         print(f"Error al leer el archivo CSV: {e}")
         return
 
     # Conectar a la base de datos SQLite
-    conn = sqlite3.connect(db_file)
+    conn = sqlite3.connect(datos_empleados)
     
     # Agregar el DataFrame a la tabla SQLite
     df.to_sql(table_name, conn, if_exists='replace', index=False)
@@ -48,30 +49,18 @@ def csv_to_sqlite(csv_file, db_file, table_name):
     # Cerrar la conexión
     conn.close()
 
-# Ejemplo de uso
-csv_file = 'data_a_procesar.csv.csv'  # Reemplaza con la ruta de tu archivo CSV
+# Rutas y nombres de archivos
+csv_file = 'data_a_procesar.csv'  # Reemplaza con la ruta de tu archivo CSV
 db_file = 'datos_empleados.db'  # Nombre de la base de datos SQLite que quieres crear
 table_name = 'empleados'  # Nombre de la tabla en la base de datos SQLite
 
+# Llamar a la función para crear la base de datos desde el CSV
 csv_to_sqlite(csv_file, db_file, table_name)
-#Fin de creador, no olvidar importar al codigo
 
-def ejecutar_query_sqlite(db_personal, table_name, columns='*', where_column=None, where_value=None):
-    """
-    Ejecuta una consulta SQ L en una base de datos SQLite y retorna una lista con los resultados.
+def ejecutar_query_sqlite(datos_empleados, table_name, columns='*', where_column=None, where_value=None):
 
-    Parámetros:
-    db_personal (str): Nombre del archivo de la base de datos SQLite.
-    table_name (str): Nombre de la tabla para realizar la consulta.
-    columns (str): Columnas a seleccionar (por defecto es '*').
-    where_column (str): Nombre de la columna para la cláusula WHERE (opcional).
-    where_value (any): Valor para la cláusula WHERE (opcional).
-
-    Retorna:
-    list: Lista con los resultados de la consulta.
-    """
     # Conectar a la base de datos SQLite
-    conn = sqlite3.connect(db_personal) 
+    conn = sqlite3.connect(datos_empleados) 
     cursor = conn.cursor()
 
     # Crear la consulta SQL
@@ -128,6 +117,8 @@ def utm_to_latlong(easting, northing, zone_number, zone_letter):
     # Convertir UTM a latitud y longitud
     longitude, latitude = utm_proj(easting, northing, inverse=True)
     return round(latitude,2), round(longitude,2)
+
+
 def insertar_data(data: list):
     for item in data:
         rut, nombre, apellido, easting, northing, zone_number, zone_letter = item
@@ -136,7 +127,7 @@ def insertar_data(data: list):
         latitude, longitude = utm_to_latlong(easting, northing, zone_number, zone_letter)
         
         # Insertar en la base de datos
-        conn = sqlite3.connect('progra2024_final.db')
+        conn = sqlite3.connect("datos_empleados.db")
         cursor = conn.cursor()
         cursor.execute('INSERT INTO personas_coordenadas (RUT, Nombre, Apellido, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)',
                        (rut, nombre, apellido, latitude, longitude))
@@ -150,7 +141,7 @@ def combo_event2(value):
     except NameError:
         pass
     
-    result = ejecutar_query_sqlite('progra2024_final.db', 'personas_coordenadas', columns='Latitude, Longitude, Nombre, Apellido', where_column='RUT', where_value=value)
+    result = ejecutar_query_sqlite('datos_empleados.db', 'personas_coordenadas', columns='Latitude, Longitude, Nombre, Apellido', where_column='RUT', where_value=value)
     
     if result:
         nombre_apellido = f"{result[0][2]} {result[0][3]}"
@@ -304,7 +295,7 @@ def agregar():
 
     label_profe = ctk.CTkLabel(ven2, text="Profesion: ")
     label_profe.pack(pady=3)
-    
+
     entry_profe = ctk.CTkEntry(ven2)
     entry_profe.pack(pady=3)
     
@@ -344,27 +335,31 @@ def agregar():
     entry_zonal = ctk.CTkEntry(ven2)
     entry_zonal.pack(pady=3)
 
-    def guardar():
+    import sqlite3
 
-        RUT       = entry_rut.get()
-        Nombre    = entry_nom.get()
-        Apellido  = entry_apellido.get()
-        Profesion = label_profe.get()
-        Pais      = entry_pais.get()
+    def guardar():
+        RUT = entry_rut.get()
+        Nombre = entry_nom.get()
+        Apellido = entry_apellido.get()
+        Profesion = label_profe.cget('text')  # Obtener el texto del CTkLabel
+        Pais = entry_pais.get()
         Estado_Emocional = entry_emo.get()
-        UTM_Easting      = entry_lat.get()
-        UTM_Northing     = entry_long.get()
-        UTM_Zone_Number  = entry_zonan.get()
-        UTM_Zone_Letter  = entry_zonal.get
+        UTM_Easting = entry_lat.get()
+        UTM_Northing = entry_long.get()
+        UTM_Zone_Number = entry_zonan.get()
+        UTM_Zone_Letter = entry_zonal.get()
 
         conn = sqlite3.connect("datos_empleados.db")
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO personas_coordenadas (RUT, Nombre, Apellido, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)',
-                (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting, UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter ))
+        cursor.execute('''INSERT INTO empleados 
+                        (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting,UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting, UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter))
         conn.commit()
         conn.close()
         ven2.destroy()
-    
+
+
     boton_guardar = ctk.CTkButton(ven2, text="Guardar", command=guardar)
     boton_guardar.pack(pady=10)
 
@@ -410,7 +405,7 @@ def mapas(panel):
 # Crear la ventana principal
 root = ctk.CTk()
 root.title("Proyecto Final progra I 2024")
-root.geometry("1000x450")
+root.geometry("1200x600")
 
 # Configurar el diseño de la ventana principal
 root.grid_rowconfigure(0, weight=1)
