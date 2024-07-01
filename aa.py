@@ -188,9 +188,8 @@ def setup_toplevel(window):
     window.geometry("400x300")
     window.title("Modificar datos")
     center_window(window, 400, 300)  # Centrar la ventana secundaria
-    window.lift()  # Levanta la ventana secundaria
-    window.focus_force()  # Forzar el enfoque en la ventana secundaria
-
+    window.lift()                    # Levanta la ventana secundaria
+    window.focus_force()             # Forzar el enfoque en la ventana secundaria
 
     label = ctk.CTkLabel(window, text="ToplevelWindow")
     label.pack(padx=20, pady=20)
@@ -211,26 +210,16 @@ def editar_panel(root):
         toplevel_window = ctk.CTkToplevel(root)
         setup_toplevel(toplevel_window)
         
-        label_rut = ctk.CTkLabel(toplevel_window, text="Rut empleado:")
+        label_rut = ctk.CTkLabel(toplevel_window, text="Ingrese Rut del empleado:")
         label_rut.pack(pady=10)
         
         entry_rut = ctk.CTkEntry(toplevel_window)
         entry_rut.pack(pady=10)
 
-        def guardar_cambios():
-            
-            #aqui se deben guardar nuevos datos
-            #deberia aver una consulata a la base de datos aqui 
-            # Cerrar la ventana después de guardar los cambios
-            toplevel_window.destroy()
-        
-        # Botón para guardar los cambios
-        boton_guardar = ctk.CTkButton(toplevel_window, text="Guardar Cambios", command=guardar_cambios)
-        boton_guardar.pack(pady=10)
-        
+        boton_selecotor = ctk.CTkButton(toplevel_window, text="Siguiente")
+        boton_selecotor.pack(pady=10)
     else:
         toplevel_window.focus()
-
 
 # Función para manejar la selección del archivo
 def seleccionar_archivo():
@@ -276,16 +265,113 @@ def mostrar_datos(datos):
     boton_modificar = ctk.CTkButton(
         master=data_panel_superior, text="Modificar Dato", command=lambda: editar_panel(root))
     boton_modificar.grid(row=0, column=1, pady=(0, 0))
-
+    
     # Botón para Agregar datos
-    boton_modificar = ctk.CTkButton(
-        master=data_panel_superior, text="Agregar Dato", command=lambda: editar_panel(root), fg_color='purple', hover_color='green')
-    boton_modificar.grid(row=0, column=2, pady=(0, 0))
+    boton_agregar = ctk.CTkButton(
+        master=data_panel_superior, text="Agregar Dato", command=agregar, fg_color='purple', hover_color='green')
+    boton_agregar.grid(row=0, column=2, pady=(0, 0))
+        
 
     # Botón para eliminar datos
     boton_eliminar = ctk.CTkButton(
         master=data_panel_superior, text="Eliminar Dato", command=lambda: editar_panel(root), fg_color='purple', hover_color='red')
     boton_eliminar.grid(row=0, column=3, padx=(10, 0))
+
+def agregar():
+
+    ven2 = ctk.CTk()
+    ven2.geometry("400x750")
+    ven2.title("Agregar datos")
+    center_window(ven2, 400, 750) 
+
+    label_rut = ctk.CTkLabel(ven2, text="RUT: ")
+    label_rut.pack(pady=3)
+
+    entry_rut = ctk.CTkEntry(ven2)
+    entry_rut.pack(pady=3)
+
+    label_nom = ctk.CTkLabel(ven2, text="Nombre: ")
+    label_nom.pack(pady=3)
+    
+    entry_nom = ctk.CTkEntry(ven2)
+    entry_nom.pack(pady=3)
+    
+    label_apellido = ctk.CTkLabel(ven2, text="Apellido: ")
+    label_apellido.pack(pady=3)
+    
+    entry_apellido = ctk.CTkEntry(ven2)
+    entry_apellido.pack(pady=3)
+
+    label_profe = ctk.CTkLabel(ven2, text="Profesion: ")
+    label_profe.pack(pady=3)
+    
+    entry_profe = ctk.CTkEntry(ven2)
+    entry_profe.pack(pady=3)
+    
+    label_pais = ctk.CTkLabel(ven2, text="Pais: ")
+    label_pais.pack(pady=3)
+
+    entry_pais = ctk.CTkEntry(ven2)
+    entry_pais.pack(pady=3)
+
+    label_emo = ctk.CTkLabel(ven2, text="Estado Emocional: ")
+    label_emo.pack(pady=3)
+
+    entry_emo = ctk.CTkEntry(ven2)
+    entry_emo.pack(pady=3)
+    
+    label_lat = ctk.CTkLabel(ven2, text="Latitud: ")
+    label_lat.pack(pady=3)
+    
+    entry_lat = ctk.CTkEntry(ven2)
+    entry_lat.pack(pady=3)
+    
+    label_long = ctk.CTkLabel(ven2, text="Longitud: ")
+    label_long.pack(pady=3)
+    
+    entry_long = ctk.CTkEntry(ven2)
+    entry_long.pack(pady=3)
+
+    label_zonan = ctk.CTkLabel(ven2, text="Numero de zona: ")
+    label_zonan.pack(pady=3)
+    
+    entry_zonan = ctk.CTkEntry(ven2)
+    entry_zonan.pack(pady=3)
+    
+    label_zonal = ctk.CTkLabel(ven2, text="Letra de zona: ")
+    label_zonal.pack(pady=3)
+    
+    entry_zonal = ctk.CTkEntry(ven2)
+    entry_zonal.pack(pady=3)
+
+    def guardar():
+
+        RUT       = entry_rut.get()
+        Nombre    = entry_nom.get()
+        Apellido  = entry_apellido.get()
+        Profesion = label_profe.get()
+        Pais      = entry_pais.get()
+        Estado_Emocional = entry_emo.get()
+        UTM_Easting      = entry_lat.get()
+        UTM_Northing     = entry_long.get()
+        UTM_Zone_Number  = entry_zonan.get()
+        UTM_Zone_Letter  = entry_zonal.get
+
+        conn = sqlite3.connect("datos_empleados.db")
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO personas_coordenadas (RUT, Nombre, Apellido, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)',
+                (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting, UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter ))
+        conn.commit()
+        conn.close()
+        ven2.destroy()
+    
+    boton_guardar = ctk.CTkButton(ven2, text="Guardar", command=guardar)
+    boton_guardar.pack(pady=10)
+
+
+
+
+
 def select_frame_by_name(name):
     home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
     frame_2_button.configure(fg_color=("gray75", "gray25") if name == "frame_2" else "transparent")
