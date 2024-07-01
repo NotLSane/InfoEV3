@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import customtkinter as ctk
-
+from tkinter import messagebox
 
 
 
@@ -44,29 +44,29 @@ def csv_to_sqlite(data_a_procesar, datos_empleados, table_name):
     conn = sqlite3.connect(datos_empleados)
     
     # Agregar el DataFrame a la tabla SQLite
-    df.to_sql(table_name, conn, if_exists='replace', index=False)
+    df.to_sql(table_name, conn, if_exists="replace", index=False)
     
     # Cerrar la conexión
     conn.close()
 
 # Rutas y nombres de archivos
-csv_file = 'data_a_procesar.csv'  # Reemplaza con la ruta de tu archivo CSV
-db_file = 'datos_empleados.db'  # Nombre de la base de datos SQLite que quieres crear
-table_name = 'empleados'  # Nombre de la tabla en la base de datos SQLite
+csv_file = "data_a_procesar.csv"  # Reemplaza con la ruta de tu archivo CSV
+db_file = "datos_empleados.db"  # Nombre de la base de datos SQLite que quieres crear
+table_name = "empleados"  # Nombre de la tabla en la base de datos SQLite
 
 # Llamar a la función para crear la base de datos desde el CSV
 csv_to_sqlite(csv_file, db_file, table_name)
 
-def ejecutar_query_sqlite(datos_empleados, table_name, columns='*', where_column=None, where_value=None):
+def ejecutar_query_sqlite(datos_empleados, table_name, columns="*", where_column=None, where_value=None):
 
     # Conectar a la base de datos SQLite
     conn = sqlite3.connect(datos_empleados) 
     cursor = conn.cursor()
 
     # Crear la consulta SQL
-    query = f'SELECT {columns} FROM {table_name}'
+    query = f"SELECT {columns} FROM {table_name}"
     if where_column and where_value is not None:
-        query += f' WHERE {where_column} = ?'
+        query += f" WHERE {where_column} = ?"
 
     # Ejecutar la consulta SQL
     cursor.execute(query, (where_value,) if where_column and where_value is not None else ())
@@ -92,7 +92,7 @@ def agregar_df_a_sqlite(df, db_personal, table_name):
     conn = sqlite3.connect(db_personal)
     
     # Agregar el DataFrame a la tabla SQLite
-    df.to_sql(table_name, conn, if_exists='replace', index=False)
+    df.to_sql(table_name, conn, if_exists="replace", index=False)
     
     # Cerrar la conexión
     conn.close()
@@ -112,7 +112,7 @@ def get_country_city(lat,long):
 # Definir la función para convertir UTM a latitud y longitud
 def utm_to_latlong(easting, northing, zone_number, zone_letter):
     # Crear el proyector UTM
-    utm_proj = pyproj.Proj(proj='utm', zone=zone_number, datum='WGS84')
+    utm_proj = pyproj.Proj(proj="utm", zone=zone_number, datum="WGS84")
     
     # Convertir UTM a latitud y longitud
     longitude, latitude = utm_proj(easting, northing, inverse=True)
@@ -129,7 +129,7 @@ def insertar_data(data: list):
         # Insertar en la base de datos
         conn = sqlite3.connect("datos_empleados.db")
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO personas_coordenadas (RUT, Nombre, Apellido, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)',
+        cursor.execute("INSERT INTO personas_coordenadas (RUT, Nombre, Apellido, Latitude, Longitude) VALUES (?, ?, ?, ?, ?)",
                        (rut, nombre, apellido, latitude, longitude))
         conn.commit()
         conn.close()
@@ -141,7 +141,7 @@ def combo_event2(value):
     except NameError:
         pass
     
-    result = ejecutar_query_sqlite('datos_empleados.db', 'personas_coordenadas', columns='Latitude, Longitude, Nombre, Apellido', where_column='RUT', where_value=value)
+    result = ejecutar_query_sqlite("datos_empleados.db", "personas_coordenadas", columns="Latitude, Longitude, Nombre, Apellido", where_column="RUT", where_value=value)
     
     if result:
         nombre_apellido = f"{result[0][2]} {result[0][3]}"
@@ -237,7 +237,7 @@ def mostrar_datos(datos):
     for widget in scrollable_frame.winfo_children():
         widget.destroy()
     
-    tree = ttk.Treeview(scrollable_frame, columns=list(datos.columns), show='headings')
+    tree = ttk.Treeview(scrollable_frame, columns=list(datos.columns), show="headings")
     for col in datos.columns:
         tree.heading(col, text=col)
         tree.column(col, width=100)
@@ -252,21 +252,31 @@ def mostrar_datos(datos):
         master=home_frame, text="Guardar Información", command=lambda: guardar_data())
     boton_guardar.grid(row=2, column=0, pady=(0, 20))
 
-    # Botón para modificar datos
+    # Botón para modificar datos    
     boton_modificar = ctk.CTkButton(
         master=data_panel_superior, text="Modificar Dato", command=lambda: editar_panel(root))
     boton_modificar.grid(row=0, column=1, pady=(0, 0))
     
     # Botón para Agregar datos
     boton_agregar = ctk.CTkButton(
-        master=data_panel_superior, text="Agregar Dato", command=agregar, fg_color='purple', hover_color='green')
+        master=data_panel_superior, text="Agregar Dato", command=agregar, fg_color="purple", hover_color="green")
     boton_agregar.grid(row=0, column=2, pady=(0, 0))
         
 
     # Botón para eliminar datos
     boton_eliminar = ctk.CTkButton(
-        master=data_panel_superior, text="Eliminar Dato", command=lambda: editar_panel(root), fg_color='purple', hover_color='red')
+        master=data_panel_superior, text="Eliminar Dato", command=eliminar_dato, fg_color="red", hover_color="darkred")
     boton_eliminar.grid(row=0, column=3, padx=(10, 0))
+
+
+
+def seleccionar_dato(event, tree):
+    global selected_row
+    selected_item = tree.selection()
+    if selected_item:
+        selected_row = tree.item(selected_item)["values"]
+
+
 
 def agregar():
 
@@ -335,13 +345,11 @@ def agregar():
     entry_zonal = ctk.CTkEntry(ven2)
     entry_zonal.pack(pady=3)
 
-    import sqlite3
-
     def guardar():
         RUT = entry_rut.get()
         Nombre = entry_nom.get()
         Apellido = entry_apellido.get()
-        Profesion = label_profe.cget('text')  # Obtener el texto del CTkLabel
+        Profesion = label_profe.cget("text")  # Obtener el texto del CTkLabel
         Pais = entry_pais.get()
         Estado_Emocional = entry_emo.get()
         UTM_Easting = entry_lat.get()
@@ -351,9 +359,9 @@ def agregar():
 
         conn = sqlite3.connect("datos_empleados.db")
         cursor = conn.cursor()
-        cursor.execute('''INSERT INTO empleados 
+        cursor.execute("""INSERT INTO empleados 
                         (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting,UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (RUT, Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting, UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter))
         conn.commit()
         conn.close()
@@ -364,6 +372,19 @@ def agregar():
     boton_guardar.pack(pady=10)
 
 
+
+def eliminar_dato(seleccionar_dato, tree):
+    seleccionar_dato_resultado = seleccionar_dato()
+    rut_a_eliminar = seleccionar_dato_resultado[0]
+    conn = sqlite3.connect("datos_empleados.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM empleados WHERE RUT = ?", (rut_a_eliminar,))
+    conn.commit()
+    conn.close()
+    
+    # Actualizar la tabla en la interfaz de usuario
+    tree.delete(tree.selection())
+    messagebox.showinfo("Información", f"El registro con RUT {rut_a_eliminar} ha sido eliminado.")
 
 
 
@@ -474,7 +495,7 @@ data_panel_inferior.grid_columnconfigure(0, weight=1)
 
 home_frame_large_image_label = ctk.CTkLabel(data_panel_superior, text="Ingresa el archivo en formato .csv",font=ctk.CTkFont(size=15, weight="bold"))
 home_frame_large_image_label.grid(row=0, column=0, padx=15, pady=15)
-home_frame_cargar_datos=ctk.CTkButton(data_panel_superior, command=seleccionar_archivo,text="Cargar Archivo",fg_color='green',hover_color='gray')
+home_frame_cargar_datos=ctk.CTkButton(data_panel_superior, command=seleccionar_archivo,text="Cargar Archivo",fg_color="green",hover_color="gray")
 home_frame_cargar_datos.grid(row=0, column=1, padx=15, pady=15)
 
 scrollable_frame = ctk.CTkScrollableFrame(master=data_panel_inferior)
@@ -538,13 +559,13 @@ canvas1.get_tk_widget().pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
 
 # Crear el gráfico de torta en el panel derecho
 fig2, ax2 = plt.subplots()
-labels = 'A', 'B', 'C', 'D'
+labels = "A", "B", "C", "D"
 sizes = [15, 30, 45, 10]
-colors = ['gold', 'yellowgreen', 'lightcoral', 'lightskyblue']
+colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue"]
 explode = (0.1, 0, 0, 0)  # explotar la porción 1
 
-ax2.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', shadow=True, startangle=140)
-ax2.axis('equal')  # para que el gráfico sea un círculo
+ax2.pie(sizes, explode=explode, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
+ax2.axis("equal")  # para que el gráfico sea un círculo
 ax2.set_title("Estado emocional vs profesion")
 
 # Integrar el gráfico de torta en el panel derecho
