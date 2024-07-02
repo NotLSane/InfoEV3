@@ -254,7 +254,7 @@ def mostrar_datos(datos):
 
     # Botón para modificar datos    
     boton_modificar = ctk.CTkButton(
-        master=data_panel_superior, text="Modificar Dato", command=lambda: editar_panel(root))
+        master=data_panel_superior, text="Modificar Dato", command=modificar_dato, fg_color="blue", hover_color="grey")
     boton_modificar.grid(row=0, column=1, pady=(0, 0))
     
     # Botón para Agregar datos
@@ -265,7 +265,7 @@ def mostrar_datos(datos):
 
     # Botón para eliminar datos
     boton_eliminar = ctk.CTkButton(
-        master=data_panel_superior, text="Eliminar Dato", command=eliminar_dato, fg_color="red", hover_color="darkred")
+        master=data_panel_superior, text="Eliminar Dato", command=eliminar_dato, fg_color="purple", hover_color="darkred")
     boton_eliminar.grid(row=0, column=3, padx=(10, 0))
 
 
@@ -277,6 +277,139 @@ def seleccionar_dato(event, tree):
         selected_row = tree.item(selected_item)["values"]
 
 
+
+def modificar_dato():
+    ven2 = ctk.CTk()
+    ven2.geometry("400x800")
+    ven2.title("Modificar datos")
+    center_window(ven2, 400, 800) 
+
+    label_rut = ctk.CTkLabel(ven2, text="RUT: ")
+    label_rut.pack(pady=3)
+
+    entry_rut = ctk.CTkEntry(ven2)
+    entry_rut.pack(pady=3)
+
+    def buscar_datos():
+        RUT = entry_rut.get()
+        conn = sqlite3.connect("datos_empleados.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM empleados WHERE RUT = ?", (RUT,))
+        datos = cursor.fetchone()
+        conn.close()
+        
+        if datos:
+            entry_nom.delete(0, ctk.END)
+            entry_nom.insert(0, datos[1])
+            entry_apellido.delete(0, ctk.END)
+            entry_apellido.insert(0, datos[2])
+            entry_profe.delete(0, ctk.END)
+            entry_profe.insert(0, datos[3])
+            entry_pais.delete(0, ctk.END)
+            entry_pais.insert(0, datos[4])
+            entry_emo.delete(0, ctk.END)
+            entry_emo.insert(0, datos[5])
+            entry_lat.delete(0, ctk.END)
+            entry_lat.insert(0, datos[6])
+            entry_long.delete(0, ctk.END)
+            entry_long.insert(0, datos[7])
+            entry_zonan.delete(0, ctk.END)
+            entry_zonan.insert(0, datos[8])
+            entry_zonal.delete(0, ctk.END)
+            entry_zonal.insert(0, datos[9])
+
+    boton_buscar = ctk.CTkButton(ven2, text="Buscar", command=buscar_datos)
+    boton_buscar.pack(pady=10)
+
+    label_nom = ctk.CTkLabel(ven2, text="Nombre: ")
+    label_nom.pack(pady=3)
+    
+    entry_nom = ctk.CTkEntry(ven2)
+    entry_nom.pack(pady=3)
+    
+    label_apellido = ctk.CTkLabel(ven2, text="Apellido: ")
+    label_apellido.pack(pady=3)
+    
+    entry_apellido = ctk.CTkEntry(ven2)
+    entry_apellido.pack(pady=3)
+
+    label_profe = ctk.CTkLabel(ven2, text="Profesion: ")
+    label_profe.pack(pady=3)
+
+    entry_profe = ctk.CTkEntry(ven2)
+    entry_profe.pack(pady=3)
+    
+    label_pais = ctk.CTkLabel(ven2, text="Pais: ")
+    label_pais.pack(pady=3)
+
+    entry_pais = ctk.CTkEntry(ven2)
+    entry_pais.pack(pady=3)
+
+    label_emo = ctk.CTkLabel(ven2, text="Estado Emocional: ")
+    label_emo.pack(pady=3)
+
+    entry_emo = ctk.CTkEntry(ven2)
+    entry_emo.pack(pady=3)
+    
+    label_lat = ctk.CTkLabel(ven2, text="Latitud: ")
+    label_lat.pack(pady=3)
+    
+    entry_lat = ctk.CTkEntry(ven2)
+    entry_lat.pack(pady=3)
+    
+    label_long = ctk.CTkLabel(ven2, text="Longitud: ")
+    label_long.pack(pady=3)
+    
+    entry_long = ctk.CTkEntry(ven2)
+    entry_long.pack(pady=3)
+
+    label_zonan = ctk.CTkLabel(ven2, text="Numero de zona: ")
+    label_zonan.pack(pady=3)
+    
+    entry_zonan = ctk.CTkEntry(ven2)
+    entry_zonan.pack(pady=3)
+    
+    label_zonal = ctk.CTkLabel(ven2, text="Letra de zona: ")
+    label_zonal.pack(pady=3)
+    
+    entry_zonal = ctk.CTkEntry(ven2)
+    entry_zonal.pack(pady=3)
+
+    def guardar():
+        RUT = entry_rut.get()
+        Nombre = entry_nom.get()
+        Apellido = entry_apellido.get()
+        Profesion = entry_profe.get()
+        Pais = entry_pais.get()
+        Estado_Emocional = entry_emo.get()
+        UTM_Easting = entry_lat.get()
+        UTM_Northing = entry_long.get()
+        UTM_Zone_Number = entry_zonan.get()
+        UTM_Zone_Letter = entry_zonal.get()
+
+        conn = sqlite3.connect("datos_empleados.db")
+        cursor = conn.cursor()
+        cursor.execute("""UPDATE empleados SET 
+                            Nombre = ?, 
+                            Apellido = ?, 
+                            Profesion = ?, 
+                            Pais = ?, 
+                            Estado_Emocional = ?, 
+                            UTM_Easting = ?, 
+                            UTM_Northing = ?, 
+                            UTM_Zone_Number = ?, 
+                            UTM_Zone_Letter = ?
+                          WHERE RUT = ?""",
+                       (Nombre, Apellido, Profesion, Pais, Estado_Emocional, UTM_Easting, UTM_Northing, UTM_Zone_Number, UTM_Zone_Letter, RUT))
+        conn.commit()
+        conn.close()
+        ven2.destroy()
+
+    boton_guardar = ctk.CTkButton(ven2, text="Guardar", command=guardar)
+    boton_guardar.pack(pady=10)
+
+
+###########################################################################################################################
 
 def agregar():
 
@@ -349,7 +482,7 @@ def agregar():
         RUT = entry_rut.get()
         Nombre = entry_nom.get()
         Apellido = entry_apellido.get()
-        Profesion = label_profe.cget("text")  # Obtener el texto del CTkLabel
+        Profesion = label_profe.cget("text")
         Pais = entry_pais.get()
         Estado_Emocional = entry_emo.get()
         UTM_Easting = entry_lat.get()
