@@ -643,12 +643,12 @@ cursor = conn.cursor()
 
 # Consulta SQL para obtener los datos de profesiones y países
 cursor.execute("SELECT profesion, pais FROM empleados")
-rows = cursor.fetchall()
+rows_profesiones = cursor.fetchall()
 
-# Extraer datos de la consulta
+# Extraer datos de la consulta de profesiones y países
 profesiones = []
 paises = []
-for row in rows:
+for row in rows_profesiones:
     profesiones.append(row[0])
     paises.append(row[1])
 
@@ -692,10 +692,10 @@ combobox_right.pack(fill=tk.BOTH, padx=10, pady=10)
 
 # Crear el gráfico de barras en el panel izquierdo
 fig1, ax1 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
-x = np.arange(len(profesiones))
-y = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
-ax1.bar(x, y)
-ax1.set_xticks(x)
+x1 = np.arange(len(profesiones))
+y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
+ax1.bar(x1, y1)
+ax1.set_xticks(x1)
 ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
 ax1.set_xlabel("Profesiones")
 ax1.set_ylabel("Número de profesionales")
@@ -708,20 +708,20 @@ canvas1.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 # Consulta SQL para obtener los datos de estado emocional y profesión
 cursor.execute("SELECT estado_emocional, profesion FROM empleados")
-rows = cursor.fetchall()
+rows_estados = cursor.fetchall()
 
-# Extraer datos de la consulta
+# Extraer datos de la consulta de estado emocional y profesión
 estados_emocionales = []
-profesiones = []
-for row in rows:
+profesiones_estados = []
+for row in rows_estados:
     estados_emocionales.append(row[0])
-    profesiones.append(row[1])
+    profesiones_estados.append(row[1])
 
 # Crear el gráfico de torta en el panel derecho
 fig2, ax2 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
 labels = list(set(estados_emocionales))
 sizes = [estados_emocionales.count(label) for label in labels]
-colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue","blue"][:len(labels)]  # Ajustar según la cantidad de estados emocionales
+colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]  # Ajustar según la cantidad de estados emocionales
 
 ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
 ax2.axis("equal")  # para que el gráfico sea un círculo
@@ -734,7 +734,6 @@ canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 # Cerrar la conexión a la base de datos
 conn.close()
-
 ########
 
 
