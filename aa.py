@@ -21,6 +21,7 @@ from tkinter import messagebox
 
 
 
+
 def haversine(lat1, lon1, lat2, lon2):
     #Función para calcular la distancia entre 2 puntos a partir de la longitud
     pass
@@ -635,76 +636,106 @@ scrollable_frame = ctk.CTkScrollableFrame(master=data_panel_inferior)
 scrollable_frame.grid(row=0, column=0,sticky="nsew")
 
 
+####
+# Crear una conexión a la base de datos SQLite
+conn = sqlite3.connect("datos_empleados.db")
+cursor = conn.cursor()
+
+# Consulta SQL para obtener los datos de profesiones y países
+cursor.execute("SELECT profesion, pais FROM empleados")
+rows = cursor.fetchall()
+
+# Extraer datos de la consulta
+profesiones = []
+paises = []
+for row in rows:
+    profesiones.append(row[0])
+    paises.append(row[1])
 
 # Crear el segundo marco
 second_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="transparent")
-#second_frame.grid_rowconfigure(0, weight=1)
-#second_frame.grid_columnconfigure(0, weight=1)
+second_frame.grid(row=0, column=0, sticky=tk.NSEW)  # Usar grid en lugar de pack
 second_frame.grid_rowconfigure(1, weight=1)
 second_frame.grid_columnconfigure(1, weight=1)
 
 # Crear el frame superior para los comboboxes
 top_frame = ctk.CTkFrame(second_frame)
-top_frame.pack(side=ctk.TOP, fill=ctk.X)
+top_frame.grid(row=0, column=0, sticky=tk.NSEW)
 
 # Crear el frame inferior para los dos gráficos
 bottom_frame = ctk.CTkFrame(second_frame)
-bottom_frame.pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
+bottom_frame.grid(row=1, column=0, sticky=tk.NSEW)
+bottom_frame.grid_rowconfigure(0, weight=1)
+bottom_frame.grid_columnconfigure(0, weight=1)
 
 # Crear los paneles izquierdo y derecho para los gráficos
 left_panel = ctk.CTkFrame(bottom_frame)
-left_panel.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
+left_panel.grid(row=0, column=0, sticky=tk.NSEW)
 
 right_panel = ctk.CTkFrame(bottom_frame)
-right_panel.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
+right_panel.grid(row=0, column=1, sticky=tk.NSEW)
 
 # Crear los paneles superior izquierdo y derecho para los comboboxes
 top_left_panel = ctk.CTkFrame(top_frame)
-top_left_panel.pack(side=ctk.LEFT, fill=ctk.X, expand=True)
+top_left_panel.grid(row=0, column=0, sticky=tk.NSEW)
 
 top_right_panel = ctk.CTkFrame(top_frame)
-top_right_panel.pack(side=ctk.RIGHT, fill=ctk.X, expand=True)
+top_right_panel.grid(row=0, column=1, sticky=tk.NSEW)
 
 # Agregar un Combobox al panel superior izquierdo
 combobox_left = ctk.CTkComboBox(top_left_panel, values=["Opción 1", "Opción 2", "Opción 3"])
-combobox_left.pack(pady=20, padx=20)
+combobox_left.pack(fill=tk.BOTH, padx=10, pady=10)
 
 # Agregar un Combobox al panel superior derecho
 combobox_right = ctk.CTkComboBox(top_right_panel, values=["Opción 1", "Opción 2", "Opción 3"])
-combobox_right.pack(pady=20, padx=20)
+combobox_right.pack(fill=tk.BOTH, padx=10, pady=10)
+
 # Crear el gráfico de barras en el panel izquierdo
-fig1, ax1 = plt.subplots()
-profesiones = ["Profesion A", "Profesion B", "Profesion C", "Profesion D", "Profesion E"]
-paises = ["País 1", "País 2", "País 3", "País 4", "País 5"]
+fig1, ax1 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
 x = np.arange(len(profesiones))
-y = np.random.rand(len(profesiones))
+y = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
 ax1.bar(x, y)
 ax1.set_xticks(x)
-ax1.set_xticklabels(profesiones)
+ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
 ax1.set_xlabel("Profesiones")
-ax1.set_ylabel("Numero de profesionales")
-ax1.set_title("Profesiones vs Paises")
+ax1.set_ylabel("Número de profesionales")
+ax1.set_title("Profesiones vs Países")
 
 # Integrar el gráfico en el panel izquierdo
 canvas1 = FigureCanvasTkAgg(fig1, master=left_panel)
 canvas1.draw()
-canvas1.get_tk_widget().pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
+canvas1.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+# Consulta SQL para obtener los datos de estado emocional y profesión
+cursor.execute("SELECT estado_emocional, profesion FROM empleados")
+rows = cursor.fetchall()
+
+# Extraer datos de la consulta
+estados_emocionales = []
+profesiones = []
+for row in rows:
+    estados_emocionales.append(row[0])
+    profesiones.append(row[1])
 
 # Crear el gráfico de torta en el panel derecho
-fig2, ax2 = plt.subplots()
-labels = "A", "B", "C", "D"
-sizes = [15, 30, 45, 10]
-colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue"]
-explode = (0.1, 0, 0, 0)  # explotar la porción 1
+fig2, ax2 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
+labels = list(set(estados_emocionales))
+sizes = [estados_emocionales.count(label) for label in labels]
+colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue","blue"][:len(labels)]  # Ajustar según la cantidad de estados emocionales
 
-ax2.pie(sizes, explode=explode, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
+ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
 ax2.axis("equal")  # para que el gráfico sea un círculo
-ax2.set_title("Estado emocional vs profesion")
+ax2.set_title("Estado emocional vs Profesión")
 
 # Integrar el gráfico de torta en el panel derecho
 canvas2 = FigureCanvasTkAgg(fig2, master=right_panel)
 canvas2.draw()
-canvas2.get_tk_widget().pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
+canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+# Cerrar la conexión a la base de datos
+conn.close()
+
+########
 
 
 # Crear el tercer marco
