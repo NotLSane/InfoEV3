@@ -636,7 +636,92 @@ scrollable_frame = ctk.CTkScrollableFrame(master=data_panel_inferior)
 scrollable_frame.grid(row=0, column=0,sticky="nsew")
 
 
-####
+# Función para actualizar el gráfico de barras
+def actualizar_grafico_barras(event):
+    seleccion_pais = combobox_left.get()  # Obtener la opción seleccionada
+    # Realizar una nueva consulta según la selección
+    cursor.execute("SELECT profesion FROM empleados WHERE pais=?", (seleccion_pais,))
+    rows_profesiones = cursor.fetchall()
+    profesiones = [row[0] for row in rows_profesiones]
+
+    # Actualizar el gráfico de barras
+    ax1.clear()  # Limpiar el eje antes de redibujar
+    x1 = np.arange(len(profesiones))
+    y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
+    ax1.bar(x1, y1)
+    ax1.set_xticks(x1)
+    ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
+    ax1.set_xlabel("Profesiones")
+    ax1.set_ylabel("Número de profesionales")
+    ax1.set_title(f"Profesiones en {seleccion_pais}")
+
+    # Redibujar el canvas
+    canvas1.draw()
+
+# Función para actualizar el gráfico de torta
+def actualizar_grafico_torta(event):
+    seleccion_estado = combobox_right.get()  # Obtener la opción seleccionada
+    # Realizar una nueva consulta según la selección
+    cursor.execute("SELECT profesion FROM empleados WHERE estado_emocional=?", (seleccion_estado,))
+    rows_profesiones = cursor.fetchall()
+    profesiones = [row[0] for row in rows_profesiones]
+
+    # Actualizar el gráfico de torta
+    ax2.clear()  # Limpiar el eje antes de redibujar
+    labels = list(set(profesiones))
+    sizes = [profesiones.count(label) for label in labels]
+    colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]
+
+    ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
+    ax2.axis("equal")
+    ax2.set_title(f"Estado emocional: {seleccion_estado}")
+
+    # Redibujar el canvas
+    canvas2.draw()
+
+# Función para actualizar el gráfico de barras
+def actualizar_grafico_barras(event):
+    seleccion_pais = combobox_left.get()  # Obtener la opción seleccionada
+    # Realizar una nueva consulta según la selección
+    cursor.execute("SELECT profesion FROM empleados WHERE pais=?", (seleccion_pais,))
+    rows_profesiones = cursor.fetchall()
+    profesiones = [row[0] for row in rows_profesiones]
+
+    # Actualizar el gráfico de barras
+    ax1.clear()  # Limpiar el eje antes de redibujar
+    x1 = np.arange(len(profesiones))
+    y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
+    ax1.bar(x1, y1)
+    ax1.set_xticks(x1)
+    ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
+    ax1.set_xlabel("Profesiones")
+    ax1.set_ylabel("Número de profesionales")
+    ax1.set_title(f"Profesiones en {seleccion_pais}")
+
+    # Redibujar el canvas
+    canvas1.draw()
+
+# Función para actualizar el gráfico de torta
+def actualizar_grafico_torta(event):
+    seleccion_estado = combobox_right.get()  # Obtener la opción seleccionada
+    # Realizar una nueva consulta según la selección
+    cursor.execute("SELECT profesion FROM empleados WHERE estado_emocional=?", (seleccion_estado,))
+    rows_profesiones = cursor.fetchall()
+    profesiones = [row[0] for row in rows_profesiones]
+
+    # Actualizar el gráfico de torta
+    ax2.clear()  # Limpiar el eje antes de redibujar
+    labels = list(set(profesiones))
+    sizes = [profesiones.count(label) for label in labels]
+    colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]
+
+    ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
+    ax2.axis("equal")
+    ax2.set_title(f"Estado emocional: {seleccion_estado}")
+
+    # Redibujar el canvas
+    canvas2.draw()
+
 # Crear una conexión a la base de datos SQLite
 conn = sqlite3.connect("datos_empleados.db")
 cursor = conn.cursor()
@@ -651,6 +736,15 @@ paises = []
 for row in rows_profesiones:
     profesiones.append(row[0])
     paises.append(row[1])
+
+# Consulta SQL para obtener los datos de estado emocional y profesión
+cursor.execute("SELECT estado_emocional FROM empleados")
+rows_estados = cursor.fetchall()
+
+# Extraer datos de la consulta de estado emocional y profesión
+estados_emocionales = []
+for row in rows_estados:
+    estados_emocionales.append(row[0])
 
 # Crear el segundo marco
 second_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="transparent")
@@ -683,20 +777,22 @@ top_right_panel = ctk.CTkFrame(top_frame)
 top_right_panel.grid(row=0, column=1, sticky=tk.NSEW)
 
 # Agregar un Combobox al panel superior izquierdo
-combobox_left = ctk.CTkComboBox(top_left_panel, values=["Opción 1", "Opción 2", "Opción 3"])
+combobox_left = ctk.CTkComboBox(top_left_panel, values=list(set(paises)))
 combobox_left.pack(fill=tk.BOTH, padx=10, pady=10)
+combobox_left.bind("<<ComboboxSelected>>", actualizar_grafico_barras)
 
 # Agregar un Combobox al panel superior derecho
-combobox_right = ctk.CTkComboBox(top_right_panel, values=["Opción 1", "Opción 2", "Opción 3"])
+combobox_right = ctk.CTkComboBox(top_right_panel, values=list(set(estados_emocionales)))
 combobox_right.pack(fill=tk.BOTH, padx=10, pady=10)
+combobox_right.bind("<<ComboboxSelected>>", actualizar_grafico_torta)
 
-# Crear el gráfico de barras en el panel izquierdo
-fig1, ax1 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
+# Crear el gráfico de barras inicial en el panel izquierdo
+fig1, ax1 = plt.subplots(figsize=(6, 4))
 x1 = np.arange(len(profesiones))
 y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
 ax1.bar(x1, y1)
 ax1.set_xticks(x1)
-ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
+ax1.set_xticklabels(profesiones, rotation=45, ha="right")
 ax1.set_xlabel("Profesiones")
 ax1.set_ylabel("Número de profesionales")
 ax1.set_title("Profesiones vs Países")
@@ -706,25 +802,14 @@ canvas1 = FigureCanvasTkAgg(fig1, master=left_panel)
 canvas1.draw()
 canvas1.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-# Consulta SQL para obtener los datos de estado emocional y profesión
-cursor.execute("SELECT estado_emocional, profesion FROM empleados")
-rows_estados = cursor.fetchall()
-
-# Extraer datos de la consulta de estado emocional y profesión
-estados_emocionales = []
-profesiones_estados = []
-for row in rows_estados:
-    estados_emocionales.append(row[0])
-    profesiones_estados.append(row[1])
-
-# Crear el gráfico de torta en el panel derecho
-fig2, ax2 = plt.subplots(figsize=(6, 4))  # Ajustar el tamaño según tus necesidades
+# Crear el gráfico de torta inicial en el panel derecho
+fig2, ax2 = plt.subplots(figsize=(6, 4))
 labels = list(set(estados_emocionales))
 sizes = [estados_emocionales.count(label) for label in labels]
-colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]  # Ajustar según la cantidad de estados emocionales
+colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]
 
 ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
-ax2.axis("equal")  # para que el gráfico sea un círculo
+ax2.axis("equal")
 ax2.set_title("Estado emocional vs Profesión")
 
 # Integrar el gráfico de torta en el panel derecho
@@ -734,7 +819,8 @@ canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 # Cerrar la conexión a la base de datos
 conn.close()
-########
+
+
 
 
 # Crear el tercer marco
