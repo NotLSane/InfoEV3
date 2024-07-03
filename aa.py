@@ -638,8 +638,10 @@ scrollable_frame.grid(row=0, column=0,sticky="nsew")
 
 # Función para actualizar el gráfico de barras
 def actualizar_grafico_barras(event):
-    seleccion_pais = combobox_left.get()  # Obtener la opción seleccionada
-    # Realizar una nueva consulta según la selección
+    seleccion_pais = combobox_left.get()  # Obtener la opción seleccionada del ComboBox izquierdo
+    print(f"Selección de país: {seleccion_pais}")  # DEBUG: Verificar la selección
+
+    # Realizar una nueva consulta según el país seleccionado
     cursor.execute("SELECT profesion FROM empleados WHERE pais=?", (seleccion_pais,))
     rows_profesiones = cursor.fetchall()
     profesiones = [row[0] for row in rows_profesiones]
@@ -647,7 +649,7 @@ def actualizar_grafico_barras(event):
     # Actualizar el gráfico de barras
     ax1.clear()  # Limpiar el eje antes de redibujar
     x1 = np.arange(len(profesiones))
-    y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
+    y1 = [profesiones.count(profesion) for profesion in profesiones]
     ax1.bar(x1, y1)
     ax1.set_xticks(x1)
     ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
@@ -660,51 +662,10 @@ def actualizar_grafico_barras(event):
 
 # Función para actualizar el gráfico de torta
 def actualizar_grafico_torta(event):
-    seleccion_estado = combobox_right.get()  # Obtener la opción seleccionada
-    # Realizar una nueva consulta según la selección
-    cursor.execute("SELECT profesion FROM empleados WHERE estado_emocional=?", (seleccion_estado,))
-    rows_profesiones = cursor.fetchall()
-    profesiones = [row[0] for row in rows_profesiones]
+    seleccion_estado = combobox_right.get()  # Obtener la opción seleccionada del ComboBox derecho
+    print(f"Selección de estado emocional: {seleccion_estado}")  # DEBUG: Verificar la selección
 
-    # Actualizar el gráfico de torta
-    ax2.clear()  # Limpiar el eje antes de redibujar
-    labels = list(set(profesiones))
-    sizes = [profesiones.count(label) for label in labels]
-    colors = ["gold", "yellowgreen", "lightcoral", "lightskyblue", "blue"][:len(labels)]
-
-    ax2.pie(sizes, labels=labels, colors=colors, autopct="%1.1f%%", shadow=True, startangle=140)
-    ax2.axis("equal")
-    ax2.set_title(f"Estado emocional: {seleccion_estado}")
-
-    # Redibujar el canvas
-    canvas2.draw()
-
-# Función para actualizar el gráfico de barras
-def actualizar_grafico_barras(event):
-    seleccion_pais = combobox_left.get()  # Obtener la opción seleccionada
-    # Realizar una nueva consulta según la selección
-    cursor.execute("SELECT profesion FROM empleados WHERE pais=?", (seleccion_pais,))
-    rows_profesiones = cursor.fetchall()
-    profesiones = [row[0] for row in rows_profesiones]
-
-    # Actualizar el gráfico de barras
-    ax1.clear()  # Limpiar el eje antes de redibujar
-    x1 = np.arange(len(profesiones))
-    y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
-    ax1.bar(x1, y1)
-    ax1.set_xticks(x1)
-    ax1.set_xticklabels(profesiones, rotation=45, ha="right")  # Rotar etiquetas del eje x
-    ax1.set_xlabel("Profesiones")
-    ax1.set_ylabel("Número de profesionales")
-    ax1.set_title(f"Profesiones en {seleccion_pais}")
-
-    # Redibujar el canvas
-    canvas1.draw()
-
-# Función para actualizar el gráfico de torta
-def actualizar_grafico_torta(event):
-    seleccion_estado = combobox_right.get()  # Obtener la opción seleccionada
-    # Realizar una nueva consulta según la selección
+    # Realizar una nueva consulta según el estado emocional seleccionado
     cursor.execute("SELECT profesion FROM empleados WHERE estado_emocional=?", (seleccion_estado,))
     rows_profesiones = cursor.fetchall()
     profesiones = [row[0] for row in rows_profesiones]
@@ -746,9 +707,10 @@ estados_emocionales = []
 for row in rows_estados:
     estados_emocionales.append(row[0])
 
-# Crear el segundo marco
+
+# Crear el segundo marco para organizar los elementos
 second_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="transparent")
-second_frame.grid(row=0, column=0, sticky=tk.NSEW)  # Usar grid en lugar de pack
+second_frame.grid(row=0, column=0, sticky=tk.NSEW)
 second_frame.grid_rowconfigure(1, weight=1)
 second_frame.grid_columnconfigure(1, weight=1)
 
@@ -781,6 +743,7 @@ combobox_left = ctk.CTkComboBox(top_left_panel, values=list(set(paises)))
 combobox_left.pack(fill=tk.BOTH, padx=10, pady=10)
 combobox_left.bind("<<ComboboxSelected>>", actualizar_grafico_barras)
 
+
 # Agregar un Combobox al panel superior derecho
 combobox_right = ctk.CTkComboBox(top_right_panel, values=list(set(estados_emocionales)))
 combobox_right.pack(fill=tk.BOTH, padx=10, pady=10)
@@ -789,7 +752,7 @@ combobox_right.bind("<<ComboboxSelected>>", actualizar_grafico_torta)
 # Crear el gráfico de barras inicial en el panel izquierdo
 fig1, ax1 = plt.subplots(figsize=(6, 4))
 x1 = np.arange(len(profesiones))
-y1 = np.random.rand(len(profesiones))  # Reemplazar con datos relevantes de la base de datos
+y1 = np.random.rand(len(profesiones))  # Inicialmente se genera un gráfico aleatorio
 ax1.bar(x1, y1)
 ax1.set_xticks(x1)
 ax1.set_xticklabels(profesiones, rotation=45, ha="right")
@@ -819,8 +782,6 @@ canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 # Cerrar la conexión a la base de datos
 conn.close()
-
-
 
 
 # Crear el tercer marco
