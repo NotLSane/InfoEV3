@@ -118,6 +118,7 @@ def utm_to_latlong(easting, northing, zone_number, zone_letter):
     return round(latitude,2), round(longitude,2)
 
 
+
 def insertar_data(data: list):
     for item in data:
         rut, nombre, apellido, easting, northing, zone_number, zone_letter = item
@@ -192,6 +193,7 @@ def calcular_distancia(RUT1,RUT2):
 def guardar_data(row_selector):
     print(row_selector.get())
     print(row_selector.table.values)
+   
 
 
 def editar_panel(root):
@@ -240,7 +242,7 @@ def mostrar_datos(datos):
     for col in datos.columns:
         tree.heading(col, text=col)
         tree.column(col, width=100)
-    
+
     for index, row in datos.iterrows():
         tree.insert("", "end", values=list(row))
     
@@ -248,7 +250,7 @@ def mostrar_datos(datos):
     
     # Botón para guardar la información
     boton_guardar = ctk.CTkButton(
-        master=home_frame, text="Guardar Información", command=lambda: guardar_data())
+        master=home_frame, text="Guardar Información", command=lambda: guardar_data)
     boton_guardar.grid(row=2, column=0, pady=(0, 20))
 
     # Botón para modificar datos    
@@ -275,18 +277,21 @@ def seleccionar_dato(event, tree):
     if selected_item:
         selected_row = tree.item(selected_item)["values"]
 
-def eliminar_dato(seleccionar_dato, tree):
-    seleccionar_dato_resultado = seleccionar_dato()
-    rut_a_eliminar = seleccionar_dato_resultado[0]
-    conn = sqlite3.connect("datos_empleados.db")
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM empleados WHERE RUT = ?", (rut_a_eliminar,))
-    conn.commit()
-    conn.close()
-    
-    # Actualizar la tabla en la interfaz de usuario
-    tree.delete(tree.selection())
-    messagebox.showinfo("Información", f"El registro con RUT {rut_a_eliminar} ha sido eliminado.")
+def eliminar_dato(tree):
+    selected_item = tree.selection()
+    if selected_item:
+        rut_a_eliminar = tree.item(selected_item)["values"][0]  # Obtener el RUT seleccionado
+        conn = sqlite3.connect("datos_empleados.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM empleados WHERE RUT = ?", (rut_a_eliminar,))
+        conn.commit()
+        conn.close()
+
+        # Actualizar la tabla en la interfaz de usuario
+        tree.delete(selected_item)
+        messagebox.showinfo("Información", f"El registro con RUT {rut_a_eliminar} ha sido eliminado.")
+
+
 
 def click_animation():
     print("Ejecutando animación al hacer clic")
@@ -700,7 +705,7 @@ for row in rows_profesiones:
     paises.append(row[1])
 
 # Consulta SQL para obtener los datos de estado emocional y profesión
-cursor.execute("SELECT estado_emocional FROM empleados")
+cursor.execute("SELECT Estado_Emocional FROM empleados")
 rows_estados = cursor.fetchall()
 
 # Extraer datos de la consulta de estado emocional y profesión
@@ -709,35 +714,35 @@ for row in rows_estados:
     estados_emocionales.append(row[0])
 
 
-# Crear el segundo marco para organizar los elementos
+# Crear el segundo marco
 second_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="transparent")
-second_frame.grid(row=0, column=0, sticky=tk.NSEW)
+#second_frame.grid_rowconfigure(0, weight=1)
+#second_frame.grid_columnconfigure(0, weight=1)
 second_frame.grid_rowconfigure(1, weight=1)
 second_frame.grid_columnconfigure(1, weight=1)
 
 # Crear el frame superior para los comboboxes
 top_frame = ctk.CTkFrame(second_frame)
-top_frame.grid(row=0, column=0, sticky=tk.NSEW)
+top_frame.pack(side=ctk.TOP, fill=ctk.X)
 
 # Crear el frame inferior para los dos gráficos
 bottom_frame = ctk.CTkFrame(second_frame)
-bottom_frame.grid(row=1, column=0, sticky=tk.NSEW)
-bottom_frame.grid_rowconfigure(0, weight=1)
-bottom_frame.grid_columnconfigure(0, weight=1)
+bottom_frame.pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
 
 # Crear los paneles izquierdo y derecho para los gráficos
 left_panel = ctk.CTkFrame(bottom_frame)
-left_panel.grid(row=0, column=0, sticky=tk.NSEW)
+left_panel.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
 
 right_panel = ctk.CTkFrame(bottom_frame)
-right_panel.grid(row=0, column=1, sticky=tk.NSEW)
+right_panel.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
 
 # Crear los paneles superior izquierdo y derecho para los comboboxes
 top_left_panel = ctk.CTkFrame(top_frame)
-top_left_panel.grid(row=0, column=0, sticky=tk.NSEW)
+top_left_panel.pack(side=ctk.LEFT, fill=ctk.X, expand=True)
 
 top_right_panel = ctk.CTkFrame(top_frame)
-top_right_panel.grid(row=0, column=1, sticky=tk.NSEW)
+top_right_panel.pack(side=ctk.RIGHT, fill=ctk.X, expand=True)
+
 
 # Agregar un Combobox al panel superior izquierdo
 combobox_left = ctk.CTkComboBox(top_left_panel, values=list(set(paises)))
@@ -753,7 +758,7 @@ combobox_right.bind("<<ComboboxSelected>>", actualizar_grafico_torta)
 # Crear el gráfico de barras inicial en el panel izquierdo
 fig1, ax1 = plt.subplots(figsize=(6, 4))
 x1 = np.arange(len(profesiones))
-y1 = np.random.rand(len(profesiones))  # Inicialmente se genera un gráfico aleatorio
+y1 = np.arange(len(profesiones))  # Inicialmente se genera un gráfico aleatorio
 ax1.bar(x1, y1)
 ax1.set_xticks(x1)
 ax1.set_xticklabels(profesiones, rotation=45, ha="right")
@@ -783,6 +788,7 @@ canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 # Cerrar la conexión a la base de datos
 conn.close()
+
 
 # Crear el tercer marco
 third_frame = ctk.CTkFrame(root, corner_radius=0, fg_color="transparent")
